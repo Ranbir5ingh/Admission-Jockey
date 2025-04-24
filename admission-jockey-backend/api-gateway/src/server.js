@@ -18,7 +18,7 @@ const logger = winston.createLogger({
   ],
 });
 
-// Initialize Express app
+ 
 const app = express();
 
 const authMiddleware = require('./middlewares/auth.middleware');
