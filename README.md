@@ -16,7 +16,6 @@ Admission Jockey backend is a microservices-based architecture designed to suppo
 - Start each service individually using `npm start` or use Docker Compose if configured.
 - The API Gateway listens on port 3000 by default.
 
-
 # Admission Jockey Backend - Detailed API Documentation
 
 ## Auth Service
