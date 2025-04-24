@@ -1,0 +1,277 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    depends_on:
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Service Discovery
+  service-discovery:
+    image: consul:latest
+    ports:
+      - "8500:8500"
+    networks:
+      - admission-jockey-network
+
+  # Auth Service
+  auth-service:
+    build: ./auth-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo-auth:27017/auth-db
+      - JWT_SECRET=your_jwt_secret_here
+    depends_on:
+      - mongo-auth
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # User Profile Service
+  user-service:
+    build: ./user-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGO_URI=mongodb://mongo-user:27017/user-db
+    depends_on:
+      - mongo-user
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # College Service
+  college-service:
+    build: ./college-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGO_URI=mongodb://mongo-college:27017/college-db
+      - REDIS_URI=redis://redis:6379
+    depends_on:
+      - mongo-college
+      - redis
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Chatbot Gateway Service
+  chatbot-gateway:
+    build: ./chatbot-gateway
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGO_URI=mongodb://mongo-chat:27017/chat-db
+      - AI_SERVICE_URL=http://ai-service:8000
+    depends_on:
+      - mongo-chat
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Application Builder Service
+  application-service:
+    build: ./application-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - MONGO_URI=mongodb://mongo-app:27017/app-db
+    depends_on:
+      - mongo-app
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Alumni Service
+  alumni-service:
+    build: ./alumni-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - MONGO_URI=mongodb://mongo-alumni:27017/alumni-db
+    depends_on:
+      - mongo-alumni
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Calendar Service
+  calendar-service:
+    build: ./calendar-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3007
+      - MONGO_URI=mongodb://mongo-calendar:27017/calendar-db
+      - REDIS_URI=redis://redis:6379
+    depends_on:
+      - mongo-calendar
+      - redis
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Payment Service
+  payment-service:
+    build: ./payment-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3008
+      - MONGO_URI=mongodb://mongo-payment:27017/payment-db
+      - RAZORPAY_KEY_ID=your_razorpay_key_id
+      - RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+    depends_on:
+      - mongo-payment
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Notification Service
+  notification-service:
+    build: ./notification-service
+    environment:
+      - NODE_ENV=development
+      - PORT=3009
+      - MONGO_URI=mongodb://mongo-notification:27017/notification-db
+      - REDIS_URI=redis://redis:6379
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+    depends_on:
+      - mongo-notification
+      - redis
+      - mailhog
+      - service-discovery
+    networks:
+      - admission-jockey-network
+
+  # Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - admission-jockey-network
+
+  # Redis for caching and queues
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - admission-jockey-network
+
+  # MongoDB instances for each service
+  mongo-auth:
+    image: mongo:latest
+    volumes:
+      - mongo-auth-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-user:
+    image: mongo:latest
+    volumes:
+      - mongo-user-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-college:
+    image: mongo:latest
+    volumes:
+      - mongo-college-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-chat:
+    image: mongo:latest
+    volumes:
+      - mongo-chat-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-app:
+    image: mongo:latest
+    volumes:
+      - mongo-app-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-alumni:
+    image: mongo:latest
+    volumes:
+      - mongo-alumni-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-calendar:
+    image: mongo:latest
+    volumes:
+      - mongo-calendar-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-payment:
+    image: mongo:latest
+    volumes:
+      - mongo-payment-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  mongo-notification:
+    image: mongo:latest
+    volumes:
+      - mongo-notification-data:/data/db
+    networks:
+      - admission-jockey-network
+
+  # Monitoring tools
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring-service/config/prometheus:/etc/prometheus
+    networks:
+      - admission-jockey-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3100:3000"
+    volumes:
+      - ./monitoring-service/config/grafana:/etc/grafana
+    networks:
+      - admission-jockey-network
+
+  # Mail server for development
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - admission-jockey-network
+
+networks:
+  admission-jockey-network:
+    driver: bridge
+
+volumes:
+  mongo-auth-data:
+  mongo-user-data:
+  mongo-college-data:
+  mongo-chat-data:
+  mongo-app-data:
+  mongo-alumni-data:
+  mongo-calendar-data:
+  mongo-payment-data:
+  mongo-notification-data:

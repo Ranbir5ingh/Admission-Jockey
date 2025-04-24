@@ -1,0 +1,7 @@
+{
+  "name": "admission-jockey-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "docker-compose -f docker-compose.yml up"
+  }
+}
