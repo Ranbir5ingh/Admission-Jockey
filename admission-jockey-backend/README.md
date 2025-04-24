@@ -1,3 +1,22 @@
+# Admission Jockey Backend Documentation
+
+## Overview
+Admission Jockey backend is a microservices-based architecture designed to support an AI-powered career counseling platform. Each microservice is independently deployable, has its own database, and communicates via REST APIs. The API Gateway routes requests to the appropriate services using service discovery.
+
+## Backend Setup
+- Each microservice runs in its own directory with a Node.js Express server.
+- MongoDB is used as the primary database for all services.
+- Redis and RabbitMQ are used for caching and messaging where applicable.
+- Service Discovery is implemented using Consul.
+- The API Gateway handles authentication, routing, rate limiting, and logging.
+
+### Running the Backend
+- Navigate to the `admission-jockey-backend` directory.
+- Run `npm install` in each service directory to install dependencies.
+- Start each service individually using `npm start` or use Docker Compose if configured.
+- The API Gateway listens on port 3000 by default.
+
+
 # Admission Jockey Backend - Detailed API Documentation
 
 ## Auth Service
